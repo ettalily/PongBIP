@@ -22,7 +22,11 @@ Use the **W and S keys** to control player 1, and the **Up and Down keys** to co
 Press the **Space Bar** to select in the menu, and the **Backspace key** during a game to end the round and exit back to the main menu.
 
 ## Building on Linux
-Make sure you have raylib and it's dependencies installed. This can be done through a package manager e.g. ``pacman -S raylib`` or through building from source. Installation specifics can be found [here](https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux).
+Requires GCC to build.
 
-To build, run
-``bash build.bash`` in the root of the repository.
+- To build for linux platforms, run
+``bash build.bash`` in the root of the repository. 
+- To build for windows platforms, run ``bash buildWin.bash`` in the root of the repository.
+
+## Notes
+- Raylib 5.5 builds for Linux and Windows for x86_64 platforms are included in the /raylib directory along with their licenses. The raylib project can be found [here](https://github.com/raysan5/raylib). I am not involved with this project.

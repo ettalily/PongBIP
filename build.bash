@@ -1,1 +1,1 @@
-g++ main.cpp -o pongbip -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+gcc -o pongbip main.cpp -I ./raylib/linux/include ./raylib/linux/lib/libraylib.a -no-pie -D_DEFAULT_SOURCE -lGL -lm -lpthread -ldl -lrt -lX11
