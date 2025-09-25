@@ -14,6 +14,8 @@ GameStates gameState = Menu;
 bool multiplayer;
 int firstTo = 0;
 int screenWaitTimer = 0;
+bool lastWinningSideRight = false;
+bool isEntryScreen = true;
 
 class Ball {
     public: 
@@ -75,17 +77,16 @@ PlayerOnePaddle player1;
 PlayerTwoPaddle player2;
 
 // Sets/Resets the ball and paddle's starting positions and values.
-void Reset(bool serveLeft) {
+void Reset() {
     player1.x = 20; player1.y = (GetScreenHeight()/2) - (player1.height/2);
     player2.x = (GetScreenWidth()) - (player2.width + 20); player2.y = (GetScreenHeight()/2) - (player2.height/2);
     ball.x = GetScreenWidth()/2; ball.y = GetScreenHeight()/2;
 
     // Sets the ball's speed values. Serves the ball towards the winner of the last round. Has a lower max speed so you don't get caught by surprise by a super fast serve.
-    if (serveLeft == true) { ball.speed_x = GetRandomValue(-12, -18); } else { ball.speed_x = GetRandomValue(12, 18); } ball.speed_y = GetRandomValue(-15, 15);
+    if (lastWinningSideRight) { ball.speed_x = GetRandomValue(-12, -18); } else { ball.speed_x = GetRandomValue(12, 18); } ball.speed_y = GetRandomValue(-15, 15);
 }
 
-// Win/Lose screen that shows after a game is finished or if backspace is pressed. Returns to the main menu after being shown.
-void GameEnd() {
+void GameOverDraw() {
     // Draws the end screen
     BeginDrawing();
         ClearBackground(BLACK);
@@ -98,22 +99,16 @@ void GameEnd() {
         else if (player2.score > player1.score) { if (multiplayer) { DrawText(TextFormat("Player 2 Wins"), 30, 20, 100, WHITE);} else { DrawText(TextFormat("CPU Wins"), 30, 20, 100, WHITE); } }
         else { DrawText(TextFormat("Game Draw"), 30, 20, 100, WHITE); }
     EndDrawing();
-
-    // Resets scores and sets how long the game end screen stays up.
-    player1.score = 0; player2.score = 0; screenWaitTimer = 120; gameState = GameOver;
 }
 
-// Scorecard intermission screen that shows between rounds. Returns to the next round after being shown.
-void RoundIntermission(bool rightSide, bool isEntryScreen) {
-    // Updates the score and checks to see if a player has won the game. Ignores this if this is the entry screen.
-    if (!isEntryScreen) { if (rightSide) { player1.score += 1; } else { player2.score += 1; } if (firstTo > 0) { if (player1.score == firstTo || player2.score == firstTo) { GameEnd(); return; } } }
-    // Sets how long the score screen remains up and resets object positions.
-    screenWaitTimer = 60; gameState = RoundInt; Reset(rightSide);
+// Resets scores and sets how long the game end screen stays up.
+void EndGame() { GameOverDraw(); screenWaitTimer = 120; gameState = GameOver;}
 
-    // Draws the round end UI.
+// Draws the round end UI.
+void ScorecardDraw() {
     BeginDrawing();
         ClearBackground(BLACK);
-        if (!isEntryScreen) { if (rightSide) { DrawRectangle(0, 0, GetScreenWidth()/2, GetScreenHeight(), GREEN); } else { DrawRectangle(GetScreenWidth()/2, 0, GetScreenWidth()/2, GetScreenHeight(), GREEN); } }
+        if (!isEntryScreen) { if (lastWinningSideRight) { DrawRectangle(0, 0, GetScreenWidth()/2, GetScreenHeight(), GREEN); } else { DrawRectangle(GetScreenWidth()/2, 0, GetScreenWidth()/2, GetScreenHeight(), GREEN); } }
         DrawText(TextFormat("%i", player1.score), (GetScreenWidth()/4) - 30, (GetScreenHeight()/2) - 100, 200, WHITE);
         DrawText(TextFormat("%i", player2.score), (GetScreenWidth() - (GetScreenWidth()/4)) - 30, (GetScreenHeight()/2) - 100, 200, WHITE);
         DrawLine(GetScreenWidth()/2, 0, GetScreenWidth()/2, GetScreenHeight(), WHITE); 
@@ -121,10 +116,31 @@ void RoundIntermission(bool rightSide, bool isEntryScreen) {
     EndDrawing();
 }
 
+// Starts a new game.
+void NewGame() {
+    // Resets player scores and other values.
+    player1.score = 0; player2.score = 0; isEntryScreen = true; lastWinningSideRight = false;
+    // Draws the scorecard.
+    ScorecardDraw();
+    // Sets how long the score screen remains up and resets object positions.
+    screenWaitTimer = 60; gameState = RoundInt; Reset();
+}
+
+// Ends the round increments the score and starts the next round. If a player has passed the FT value, then calls EndGame().
+void EndRound(bool rightWin) {
+    lastWinningSideRight = rightWin;
+    // Updates the score and checks to see if a player has won the game.
+    if (lastWinningSideRight) { player1.score += 1; } else { player2.score += 1; } if (firstTo > 0) { if (player1.score == firstTo || player2.score == firstTo) { EndGame(); return; } }
+    // Draws the Scorecard
+    ScorecardDraw();
+    // Sets how long the score screen remains up and resets object positions.
+    screenWaitTimer = 60; gameState = RoundInt; Reset();
+}
+
 // The main game logic.
 void Game() {
     // Exits the game if backspace is pressed.
-    if (IsKeyPressed(KEY_BACKSPACE)) {GameEnd(); return;}
+    if (IsKeyPressed(KEY_BACKSPACE)) {EndGame(); return;}
 
     ball.Update();
     player1.Update();
@@ -136,7 +152,7 @@ void Game() {
     if (ball.speed_x > 0 && CheckCollisionRecs(Rectangle{ball.x, ball.y, ball.width, ball.width}, Rectangle{player2.x, player2.y, player2.width, player2.height})) { ball.speed_x = GetRandomValue(-12, -25); ball.speed_y = GetRandomValue(-15, 15);}
     
     // Checks if the ball has passes one of the player's goal walls and draws the EndOfRound screen if it has, and draws the normal screen if it has not.
-    if (ball.x >= GetScreenWidth()) { RoundIntermission(true, false); } else if ( ball.x + ball.width <= 0 ) { RoundIntermission(false, false); }
+    if (ball.x >= GetScreenWidth()) { EndRound(true); return; } else if ( ball.x + ball.width <= 0 ) { EndRound(false); return; }
     else {
         // Object Drawing
         BeginDrawing();
@@ -161,12 +177,12 @@ class MainMenu {
         // Manages menu navigation and draws the selection box.
         switch (selected) {
             case CPUMatch: 
-                if (IsKeyPressed(KEY_SPACE)) { multiplayer = false; gameState = RoundInt; screenWaitTimer = 60; RoundIntermission(true, true); return; }
+                if (IsKeyPressed(KEY_SPACE)) { multiplayer = false; gameState = RoundInt; screenWaitTimer = 60; EndDrawing(); NewGame(); return; }
                 else if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) { selected = PlayerMatch; }
                 DrawRectangle(500, (GetScreenHeight()/2) + 15, 20, 20, WHITE);
                 break;
             case PlayerMatch:
-                if (IsKeyPressed(KEY_SPACE)) { multiplayer = true; gameState = RoundInt; screenWaitTimer = 60; RoundIntermission(true, true); return; }
+                if (IsKeyPressed(KEY_SPACE)) { multiplayer = true; gameState = RoundInt; screenWaitTimer = 60; EndDrawing(); NewGame(); return; }
                 else if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) { selected = CPUMatch; } else if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) { selected = FirstTo; }
                 DrawRectangle(500, (GetScreenHeight()/2) + 90, 20, 20, WHITE);
                 break;
@@ -182,13 +198,13 @@ class MainMenu {
                 DrawRectangle(550, (GetScreenHeight()/2) + 165, 20, 20, GREEN);
                 break;
             case Exit:
-                if (IsKeyPressed(KEY_SPACE)) { CloseWindow(); }
+                if (IsKeyPressed(KEY_SPACE)) { EndDrawing(); CloseWindow(); }
                 else if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) { selected = FirstTo; }
                 DrawRectangle(500, (GetScreenHeight()/2) + 240, 20, 20, WHITE);
                 break;
         }
-    
-        // Draws the entire menu except the cursor.
+
+        // Draws the entire menu except the cursor. 
         DrawText(TextFormat("Pong, but it's Pong"), 325, (GetScreenHeight()/2) - 200, 100, WHITE);
         DrawText(TextFormat("CPU Match"), 600, GetScreenHeight()/2, 50, WHITE);
         DrawText(TextFormat("Player Match"), 700, (GetScreenHeight()/2) + 75, 50, WHITE);
@@ -204,7 +220,8 @@ MainMenu menu;
 // Manages the game state.
 int main() {
     // Sets Window Properties
-    InitWindow(1600, 900, "Pong, but it's Pong");
+    const int windowWidth = 1600; const int windowHeight = 900;
+    InitWindow(windowWidth, windowHeight, "Pong, but it's Pong");
     SetTargetFPS(60);
 
     // Runs onces per frame.
@@ -213,8 +230,8 @@ int main() {
         switch (gameState) {
             case Menu: menu.UpdateAndDraw(); break;
             case Round: Game(); break;
-            case RoundInt: if (screenWaitTimer > 0) { screenWaitTimer -= 1; EndDrawing(); } else { gameState = Round; } break;
-            case GameOver: if (screenWaitTimer > 0) { screenWaitTimer -= 1; EndDrawing(); } else { gameState = Menu; } break;
+            case RoundInt: if (screenWaitTimer > 0) { screenWaitTimer -= 1; ScorecardDraw(); } else { isEntryScreen = false; gameState = Round; } break;
+            case GameOver: if (screenWaitTimer > 0) { screenWaitTimer -= 1; GameOverDraw(); } else { gameState = Menu; } break;
         }
     }
 }
