@@ -10,11 +10,7 @@ I plan to make some additions and changes to it in future, primarily as a way to
 - **CPU Matches** - Has a very simple but competent AI CPU opponent.
 - **Player Matches** - Can be played with another human opponent.
 - **First to X Format Setting** - Can be set to a first to X format with a selected number of rounds needed to win.
-
-### Planned Additions and Changes
-- **Sound Effects and Audio** - Would help me learn how to implement and work with audio.
-- **Using Multiple Scripts** - Currently all the code is in a single script as I don't know how to properly organise my code.
-- **Controller Support** - Lowest on my priorities but would be useful to learn.
+- **CPU Vs CPU Matches** - Make the CPUs play against one another.
 
 ## Controls
 Use the **W and S keys** to control player 1, and the **Up and Down keys** to control player 2. In singleplayer, either can be used. These keys are also used to navigate the menu.
@@ -22,10 +18,9 @@ Use the **W and S keys** to control player 1, and the **Up and Down keys** to co
 Press the **Space Bar** to select in the menu, and the **Backspace key** during a game to end the round and exit back to the main menu.
 
 ## Building on Linux
-Requires GCC to build.
+Requires ``gcc`` for linux builds and ``mingw-w64-gcc`` for windows builds.
 
-- To build for linux platforms, run
-``bash build.bash`` in the root of the repository. 
+- To build for linux platforms, run ``bash build.bash`` in the root of the repository. 
 - To build for windows platforms, run ``bash buildWin.bash`` in the root of the repository.
 
 ## Notes
