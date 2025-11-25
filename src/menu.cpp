@@ -4,11 +4,12 @@ bool audioEnabled = true;
 
 // Starts a new game.
 void NewGame() {
-    Reset(); 
+    Reset();
+    sprintf(firstToText, "FT%d", firstTo);
     lastWinningSideRight = false; 
     player1.score = 0; player2.score = 0; 
     screenWaitTimer = 60; 
-    isEntryScreen = true; 
+    isEntryScreen = true;
     gameState = RoundInt; 
 }
 
@@ -33,8 +34,8 @@ void MainMenu() {
             break;
         case FirstToSelected:
             if (IsKeyPressed(KEY_SPACE)) {  selectedMode = FirstTo; }
-            else if ((IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_W) || IsKeyPressedRepeat(KEY_UP)) && firstTo < 99) { firstTo += 1; if (audioEnabled) { PlaySound(wallHit); } } 
-            else if ((IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_S) || IsKeyPressedRepeat(KEY_DOWN)) && firstTo > 0) { firstTo -= 1; if (audioEnabled) { PlaySound(wallHit); } }
+            else if ((IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP) || IsKeyPressedRepeat(KEY_W) || IsKeyPressedRepeat(KEY_UP)) && firstTo < 99) { firstTo += 1; sprintf(firstToText, "First to: %d", firstTo); if (audioEnabled) { PlaySound(wallHit); } } 
+            else if ((IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN) || IsKeyPressedRepeat(KEY_S) || IsKeyPressedRepeat(KEY_DOWN)) && firstTo > 0) { firstTo -= 1; sprintf(firstToText, "First to: %d", firstTo); if (audioEnabled) { PlaySound(wallHit); } }
             break;
         case SoundToggle:
             if (IsKeyPressed(KEY_SPACE)) { audioEnabled = !audioEnabled; }

@@ -31,7 +31,7 @@ int main() {
             case Menu: MainMenu(); break;
             case Round: Game(); break;
             case RoundInt: if (screenWaitTimer > 0) { screenWaitTimer -= 1; } else { isEntryScreen = false; gameState = Round; } break;
-            case GameOver: if (screenWaitTimer > 0) { screenWaitTimer -= 1; } else { gameState = Menu; } break;
+            case GameOver: if (screenWaitTimer > 0) { screenWaitTimer -= 1; } else { sprintf(firstToText, "First to: %d", firstTo); gameState = Menu; } break;
         }
         Draw();
     }

@@ -61,6 +61,10 @@ void Reset() {
     player2.y = (GetScreenHeight()/2) - (player2.height/2);
     ball.x = GetScreenWidth()/2; ball.y = GetScreenHeight()/2;
 
+    // Update score text.
+    sprintf(p1ScoreText, "%d", player1.score);
+    sprintf(p2ScoreText, "%d", player2.score);
+
     // Sets the ball's speed values. Serves the ball towards the winner of the last round. Has a lower max speed so you don't get caught by surprise by a super fast serve.
     if (lastWinningSideRight) { ball.speed_x = GetRandomValue(-10, -12); } else { ball.speed_x = GetRandomValue(10, 12); } ball.speed_y = GetRandomValue(-12, 12);
 }

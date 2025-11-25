@@ -1,5 +1,8 @@
 #include <iostream>
+#include <string>
+#include <cstdio>
 #include <raylib.h>
+#include <raymath.h>
 
 #define WINDOW_WIDTH 1600
 #define WINDOW_HEIGHT 900
@@ -48,4 +51,5 @@ void Reset();
 void Game();
 
 // draw.cpp
+extern char firstToText[12], p1ScoreText[2], p2ScoreText[2];
 void Draw();
