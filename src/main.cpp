@@ -5,10 +5,12 @@ GameStates gameState = Menu;
 
 int screenWaitTimer = 0;
 bool isEntryScreen = true, gameShouldClose = false;
+float scaleFocus;
 
 // Manages the game state.
 int main() {
     // Sets window properties.
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Pong, but it's Pong"); 
     SetTargetFPS(60);
 
@@ -18,14 +20,16 @@ int main() {
     wallHit = LoadSound("sound/wallhit.wav");
     outOfBounds = LoadSound("sound/outofbounds.wav");
     
-    // Sets paddle properties
-    player1.x = 20; 
-    player2.x = GetScreenWidth() - (player2.width + 20);
+    // Sets paddle identities
     player1.isPlayer1 = true;
     player2.isPlayer1 = false;
+    player1.positionPercentage.x = 0.015f;
+    player2.positionPercentage.x = 0.985f;
 
     // Runs onces per frame.
     while(!gameShouldClose && !WindowShouldClose()) {
+        if (IsKeyPressed(KEY_ENTER)) { ToggleBorderlessWindowed(); }
+        if (GetScreenHeight() <= GetScreenWidth()) { scaleFocus = GetScreenHeight(); } else { scaleFocus = GetScreenWidth(); }
         // Manages what part of the code should be running in different states.
         switch (gameState) {
             case Menu: MainMenu(); break;

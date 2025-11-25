@@ -1,1 +1,1 @@
-x86_64-w64-mingw32-gcc -o ./src/global.hpp ./src/*.cpp -I ./raylib/windows/include -L ./raylib/windows/lib -lraylib -lgdi32 -lwinmm
+x86_64-w64-mingw32-gcc -o ./src/global.hpp ./src/*.cpp -I ./raylib/windows/include -L ./raylib/windows/lib/libraylib.a -lgdi32 -lwinmm

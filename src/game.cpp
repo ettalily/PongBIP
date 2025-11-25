@@ -8,9 +8,9 @@ int firstTo = 0;
 
 // Controls the ball's movement.
 void Ball::Update() {
-    x += speed_x; y += speed_y; 
+    positionPercentage += speed;
     // Forces the ball to bounce if it collides with the top or bottom screen edge.
-    if ((speed_y > 0 && y + width >= GetScreenHeight()) || (speed_y < 0 && y <= 0)) { speed_y *= -1; if (audioEnabled) { PlaySound(wallHit); } }
+    if ((speed.y < 0 && positionPercentage.y <= 0.015f) || (speed.y > 0 && positionPercentage.y >= 0.985f)) { speed.y *= -1; if (audioEnabled) { PlaySound(wallHit); } }
 }
 
 // Player input code.
@@ -39,17 +39,17 @@ void Paddle::PlayerUpdate() {
 void Paddle::CPUUpdate() {
     if (cpuUpdateTimer > 0) { cpuUpdateTimer -= 1; } else {
         // Decides what direction to go in based on whether the ball is close to the paddle. This only updates if it is done with it's existing commitment.
-        if (y - (height * 0.25f) > ball.y) { moveDir = Up; } else if (y + (height * 0.25f) < ball.y) {moveDir = Down;} else { moveDir = Neutral; }
+        if (positionPercentage.y - (height * 0.25f) > ball.positionPercentage.y) { moveDir = Up; } else if (positionPercentage.y + (height * 0.25f) < ball.positionPercentage.y) {moveDir = Down;} else { moveDir = Neutral; }
         // Decides how long it commits to that movement, with the CPU making smaller commitments the closer the ball is horizontally.
-        cpuUpdateTimer = GetRandomValue(4, abs((x+(width * 0.5f)) - ball.x)/50);
+        cpuUpdateTimer = GetRandomValue(4, abs((positionPercentage.x * 1000) - (ball.positionPercentage.x * 150))/50);
     }
     Move();
 }
 
 // Moves the paddle in the respective direction without allowing it to move beyond the boundaries of the screen.
 void Paddle::Move() {
-    if(moveDir == Up) { y -= speed; if (y < 0) { y = 0; } } 
-    if(moveDir == Down) { y += speed; if (y > GetScreenHeight() - height) { y = GetScreenHeight() - height; } }
+    if (moveDir == Up) { positionPercentage.y -= speed; } if (positionPercentage.y - (height * 0.5f) < 0.0f) { positionPercentage.y = height * 0.5f; }
+    if (moveDir == Down) { positionPercentage.y += speed; } if (positionPercentage.y + (height * 0.5f) > 1.0f) { positionPercentage.y = 1.0f - (height * 0.5f); }
 }
 
 // Resets scores and sets how long the game end screen stays up.
@@ -57,16 +57,17 @@ void EndGame() { screenWaitTimer = 120; gameState = GameOver; }
 
 // Sets/Resets the ball and paddle's starting positions and values.
 void Reset() {
-    player1.y = (GetScreenHeight()/2) - (player1.height/2);
-    player2.y = (GetScreenHeight()/2) - (player2.height/2);
-    ball.x = GetScreenWidth()/2; ball.y = GetScreenHeight()/2;
+    player1.positionPercentage.y = 0.5f;
+    player2.positionPercentage.y = 0.5f;
+    ball.positionPercentage = (Vector2){ 0.5f, 0.5f };
 
     // Update score text.
     sprintf(p1ScoreText, "%d", player1.score);
     sprintf(p2ScoreText, "%d", player2.score);
 
     // Sets the ball's speed values. Serves the ball towards the winner of the last round. Has a lower max speed so you don't get caught by surprise by a super fast serve.
-    if (lastWinningSideRight) { ball.speed_x = GetRandomValue(-10, -12); } else { ball.speed_x = GetRandomValue(10, 12); } ball.speed_y = GetRandomValue(-12, 12);
+    if (lastWinningSideRight) { ball.speed.x = GetRandomValue(-8, -12) * 0.001f; } else { ball.speed.x = GetRandomValue(8, 12) * 0.001f; }
+    ball.speed.y = GetRandomValue(-15, 15) * 0.001f;
 }
 
 // Ends the round increments the score and starts the next round. If a player has passed the FT value, then calls EndGame().
@@ -84,25 +85,27 @@ void Game() {
 
     ball.Update();
     // Calls different code for a human player and for a cpu. The cpu only moves when the ball is heading towards it.
-    if (selectedMode == PlayerMatch || selectedMode == CPUMatch) { player1.PlayerUpdate(); } else if (ball.speed_x < 0) { player1.CPUUpdate(); }
-    if (selectedMode == PlayerMatch) { player2.PlayerUpdate(); } else if (ball.speed_x > 0) { player2.CPUUpdate(); }
+    if (selectedMode == PlayerMatch || selectedMode == CPUMatch) { player1.PlayerUpdate(); } else if (ball.speed.x < 0) { player1.CPUUpdate(); }
+    if (selectedMode == PlayerMatch) { player2.PlayerUpdate(); } else if (ball.speed.x > 0) { player2.CPUUpdate(); }
     
     // Checks collisions between the ball and the paddle and sets the new value.
-    if (ball.speed_x < 0 && CheckCollisionRecs(Rectangle{ball.x, ball.y, ball.width, ball.width}, Rectangle{player1.x, player1.y, player1.width, player1.height})) { 
-        ball.speed_x = GetRandomValue(12, 25); ball.speed_y = GetRandomValue(-15, 15);
+    if (ball.speed.x < 0 && CheckCollisionRecs(Rectangle{(GetScreenWidth() * ball.positionPercentage.x) - (ball.width * GetScreenHeight() * 0.5f), (GetScreenHeight() * ball.positionPercentage.y) - (ball.width * GetScreenHeight() * 0.5f), GetScreenHeight() * ball.width, GetScreenHeight() * ball.width}, Rectangle{(GetScreenWidth() * player1.positionPercentage.x) - (player1.width * GetScreenHeight() * 0.5f), (GetScreenHeight() * player1.positionPercentage.y) - (player1.height * GetScreenHeight() * 0.5f), GetScreenHeight() * player1.width, GetScreenHeight() * player1.height})) { 
+        ball.speed.x = GetRandomValue(8, 20) * 0.001f; ball.speed.y = GetRandomValue(-25, 25) * 0.001f;
+        if (ball.positionPercentage.x < player1.positionPercentage.x) { ball.positionPercentage.x = player1.positionPercentage.x; }
         if (audioEnabled) { PlaySound(paddleHit); }
     }
-    if (ball.speed_x > 0 && CheckCollisionRecs(Rectangle{ball.x, ball.y, ball.width, ball.width}, Rectangle{player2.x, player2.y, player2.width, player2.height})) {
-        ball.speed_x = GetRandomValue(-12, -25); ball.speed_y = GetRandomValue(-15, 15);
+    if (ball.speed.x > 0 && CheckCollisionRecs(Rectangle{(GetScreenWidth() * ball.positionPercentage.x) - (ball.width * GetScreenHeight() * 0.5f), (GetScreenHeight() * ball.positionPercentage.y) - (ball.width * GetScreenHeight() * 0.5f), GetScreenHeight() * ball.width, GetScreenHeight() * ball.width}, Rectangle{(GetScreenWidth() * player2.positionPercentage.x) - (player2.width * GetScreenHeight() * 0.5f), (GetScreenHeight() * player2.positionPercentage.y) - (player2.height * GetScreenHeight() * 0.5f), GetScreenHeight() * player2.width, GetScreenHeight() * player2.height})) {
+        ball.speed.x = GetRandomValue(-8, -20) * 0.001f; ball.speed.y = GetRandomValue(-25, 25) * 0.001f;
+        if (ball.positionPercentage.x < player2.positionPercentage.x) { ball.positionPercentage.x = player2.positionPercentage.x; }
         if (audioEnabled) { PlaySound(paddleHit); }
     }
     
     // Checks if the ball has passes one of the player's goal walls and draws the EndOfRound screen if it has, and draws the normal screen if it has not.
-    if (ball.x >= GetScreenWidth()) {
+    if (ball.positionPercentage.x >= 1.00f) {
         EndRound(true);
         if (audioEnabled) { PlaySound(outOfBounds); }
         return;
-    } else if ( ball.x + ball.width <= 0 ) {
+    } else if ( ball.positionPercentage.x <= 0.0f ) {
         EndRound(false);
         if (audioEnabled) { PlaySound(outOfBounds); }
         return;

@@ -13,7 +13,8 @@ enum Direction { Neutral, Up, Down }; // Direction states used for the CPU playe
 
 class Ball {
     public:
-    float x, y, width = 30; int speed_x, speed_y;
+    float width = 0.035f; 
+    Vector2 positionPercentage, speed;
 
     void Draw();
     void Update();
@@ -22,8 +23,9 @@ extern Ball ball;
 
 class Paddle {
     public:
-    float x, y, width = 20, height = 150;
-    int speed = 15, score = 0, cpuUpdateTimer = 0;
+    float width = 0.03f, height = 0.2f, speed = 0.022f;
+    Vector2 positionPercentage, size;
+    int score = 0, cpuUpdateTimer = 0;
     bool isPlayer1;
     Direction moveDir = Neutral;
 
@@ -39,6 +41,7 @@ extern MenuOptions selectedMode;
 extern GameStates gameState;
 extern int firstTo, screenWaitTimer;
 extern bool isEntryScreen, gameShouldClose;
+extern float scaleFocus;
 
 // menu.cpp
 extern bool audioEnabled;
