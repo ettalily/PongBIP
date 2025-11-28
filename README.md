@@ -43,7 +43,7 @@ gcc -o pongbip.exe ./src/global.hpp ./src/*.cpp -I ./raylib/include ./raylib/win
 ```
 
 ## License
-This software is licensed under an MIT license, which can be found in [`LICENSE`](https://github.com/ettalily/PongBIP/blob/main/LICENSE). 
+This software is licensed under an MIT license, which can be found in [`LICENSE`](https://github.com/ettalily/Pang/blob/main/LICENSE). 
 
 ## Notes
 - Raylib 5.5 builds for Linux and Windows for x86_64 platforms are included in the ``./raylib`` directory along with their licenses. The raylib project can be found [here](https://github.com/raysan5/raylib). I am not involved with this project.
