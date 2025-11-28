@@ -1,10 +1,10 @@
-# Pong, but it's Pong
+# Pang
 Pretty cool, huh?
 
 ## About
-*"Pong, but it's Pong"* is a recreation of Pong in C++ and Raylib made as a way for me to learn how to use both. It is rather bare-bones and simple, but hopefully works well and has quite a lot of polish. 
+*"Pang"* is a totally cool and original game idea that has never been done before now made in C++ and Raylib made as a way for me to learn how to use both. It is rapidly ballooning in features and scale to the point where it was more than good enough ages ago. But alas, I will keep going as I find working on this quite relaxing and it is quite frankly very funny to continue to over-engineer this game. 
 
-I plan to make some additions and changes to it in future, primarily as a way to learn how to implement certain things.
+I plan to make some additions and changes to it in future, primarily as a way to learn how to implement certain things, but we'll see.
 
 ## Features
 - **CPU Matches** - Has a very simple but competent AI CPU opponent.

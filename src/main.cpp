@@ -11,7 +11,7 @@ float scaleFocus;
 int main() {
     // Sets window properties.
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Pong, but it's Pong"); 
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Pang"); 
     SetTargetFPS(60);
 
     // Initializes audio device and loads sounds.
